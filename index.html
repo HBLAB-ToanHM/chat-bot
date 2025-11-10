@@ -153,7 +153,10 @@
               onclick="toggleChat()"
               class="p-2 rounded-full close-icon transition"
             >
-              <!--@import(/svg/icon-close.html)-->
+              <img
+                src="https://sehanf.cafe24.com/web/product/medium/chat-bot/icon-close.svg"
+                alt="close"
+              />
             </button>
           </div>
 
@@ -167,9 +170,9 @@
                 class="w-full search-input !pl-[33px] pr-4 py-[13px] rounded-full focus:outline-none text-sm"
               />
               <img
-                src="https://sehanf.cafe24.com/web/product/medium/icon-search.svg"
+                src="https://sehanf.cafe24.com/web/product/medium/chat-bot/icon-search.svg"
                 alt="Search"
-                class="h-4 w-4 absolute left-3 !top-[20%] !transform-none -translate-y-1/2"
+                class="h-4 w-4 absolute left-3 !top-[13px] !transform-none -translate-y-1/2"
               />
             </div>
           </div>
@@ -250,7 +253,10 @@
                 onclick="sendMessage()"
                 class="px-4 py-3 transition duration-150 active:scale-95"
               >
-                <!--@import(/svg/icon-send.html)-->
+                <img
+                  src="https://sehanf.cafe24.com/web/product/medium/chat-bot/icon-send.svg"
+                  alt="send"
+                />
               </button>
             </div>
           </div>
@@ -263,11 +269,13 @@
         onclick="toggleChat()"
         class="w-[56px] item-right h-[56px] background-main-color text-white rounded-full shadow-lg transition duration-300 transform hover:scale-105 active:scale-90 flex items-center justify-center focus:outline-none"
       >
-        <!-- Chat Icon -->
-        <!--@import(/svg/chat-admin-log.html)-->
+        <img
+          src="https://sehanf.cafe24.com/web/product/medium/chat-bot/chat-admin-log.svg"
+          alt="admin"
+        />
       </button>
     </div>
   </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="./chat-bot.js"></script>
+<script src="../utils/chat-bot.js"></script>
