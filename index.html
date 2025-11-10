@@ -1,19 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chatbot Admin</title>
-  <style>
-    body { margin: 0; padding: 0; }
-    iframe {
-      width: 100%;
-      height: 100vh;
-      border: none;
-    }
-  </style>
-</head>
-<body>
-<div>test chat bot</div>
-</body>
+<html lang="vi">
+  <!--@js(/chatbot/list-chat-bot.js)-->
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách Chat Bot</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom scrollbar cho khu vực tin nhắn */
+      .message-area::-webkit-scrollbar {
+        width: 4px;
+      }
+      .message-area::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      .message-area::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 2px;
+      }
+      .message-area::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      /* Hiệu ứng chuyển đổi cho tab */
+      .chat-tab-transition {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+
+      /* CSS cho Loading Spinner */
+      .lds-dual-ring {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+      }
+      .lds-dual-ring:after {
+        content: " ";
+        display: block;
+        width: 15px;
+        height: 15px;
+        margin: 1px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        border-color: #4f46e5 transparent #4f46e5 transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+      }
+
+      @keyframes lds-dual-ring {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .chat-bot-item {
+        transition: all 0.2s ease;
+      }
+
+      .chat-bot-item:hover {
+        background-color: #f3f4f6;
+      }
+
+      .chat-bot-item.active {
+        background-color: #eef2ff;
+        border-color: #4f46e5;
+      }
+
+      /* Ẩn/hiện màn hình với transition */
+      .screen-view {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        pointer-events: none;
+      }
+
+      .screen-view.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+
+      .item-right {
+        margin-left: auto;
+      }
+      .neutral-color {
+        color: #202020;
+      }
+      .main-color {
+        color: #296330;
+      }
+      .background-main-color {
+        background-color: #296330;
+      }
+      .close-icon {
+        transition: all 0.3s ease;
+        &:hover {
+          background-color: #296330;
+          color: #fff;
+        }
+      }
+      .search-input {
+        background-color: var(
+          --color-bg-fill-neutral-subtle-default,
+          #00000010
+        );
+      }
+      .input-base {
+        background: var(--color-bg-fill-neutral-subtle-default, #00000010);
+        border-radius: 24px;
+        height: 48px;
+      }
+      .avatar-chat-list {
+        border-radius: 8px;
+        background: var(--color-display-gray-light, #00000010);
+      }
+      .message-area-content {
+        background-color: #2963301a;
+      }
+      .chat-bot-around {
+        background: var(--color-display-green-light, #00aa0b18);
+      }
+    </style>
+  </head>
+  <body class="font-sans">
+    <!-- CHAT WIDGET CONTAINER -->
+    <div id="chat-widget-container" class="fixed bottom-4 right-4 z-[1000]">
+      <!-- Chat Tab/Pane -->
+      <div
+        id="chat-tab"
+        class="chat-tab-transition fixed bottom-4 right-4 w-[500px] h-[85vh] max-h-[700px] bg-white rounded-xl shadow-2xl flex flex-col opacity-0 scale-95 pointer-events-none relative sm:right-4"
+      >
+        <!-- Màn hình Danh sách Chat Bot -->
+        <div id="list-screen" class="screen-view active flex-1 flex flex-col">
+          <!-- Header -->
+          <div
+            class="p-6 neutral-color rounded-t-xl flex items-center justify-between"
+          >
+            <h2 class="text-[30px] font-semibold line-height-[36px]">
+              채팅 리스트
+            </h2>
+            <button
+              id="close-tab-btn"
+              onclick="toggleChat()"
+              class="p-2 rounded-full close-icon transition"
+            >
+              <!--@import(/svg/icon-close.html)-->
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="p-4 bg-white">
+            <div class="relative">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search"
+                class="w-full search-input !pl-[33px] pr-4 py-[13px] rounded-full focus:outline-none text-sm"
+              />
+              <img
+                src="https://sehanf.cafe24.com/web/product/medium/icon-search.svg"
+                alt="Search"
+                class="h-4 w-4 absolute left-3 !top-[20%] !transform-none -translate-y-1/2"
+              />
+            </div>
+          </div>
+
+          <!-- Danh sách Chat Bot -->
+          <div
+            id="chat-bot-list-container"
+            class="flex-1 overflow-y-auto relative"
+          >
+            <div id="chat-bot-list" class="p-4 space-y-2">
+              <!-- Items show by JavaScript -->
+            </div>
+
+            <!-- Loading search results -->
+            <div
+              id="search-loading"
+              class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10"
+            >
+              <div class="flex items-center">
+                <div class="lds-dual-ring"></div>
+                <span class="ml-2 text-sm text-gray-500">Searching...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Màn hình Chat Window -->
+        <div id="chat-screen" class="screen-view flex-1 flex flex-col">
+          <!-- Chat Header -->
+          <div class="p-4 flex items-center justify-between rounded-t-xl">
+            <div class="flex items-center">
+              <button
+                id="back-btn"
+                onclick="backToList()"
+                class="p-2 rounded-full transition mr-2"
+                title="Back to list"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <!-- Avatar Bot -->
+              <div class="flex flex-col">
+                <span id="chat-header-title" class="text-lg font-semibold"
+                  >벡스볼트 챗봇</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Message Area -->
+          <div
+            id="message-area"
+            class="flex-grow p-4 message-area-content overflow-y-auto space-y-4"
+          >
+            <!-- Tin nhắn khởi tạo sẽ được thêm bằng JavaScript -->
+          </div>
+
+          <!-- Input Area -->
+          <div class="p-4 border-t border-gray-200 bg-white rounded-b-xl">
+            <div class="flex">
+              <input
+                type="text"
+                id="chat-input"
+                class="flex-grow input-base p-3 focus:outline-none text-sm"
+              />
+              <button
+                id="send-btn"
+                onclick="sendMessage()"
+                class="px-4 py-3 transition duration-150 active:scale-95"
+              >
+                <!--@import(/svg/icon-send.html)-->
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Bubble/Toggle Button -->
+      <button
+        id="chat-toggle-button"
+        onclick="toggleChat()"
+        class="w-[56px] item-right h-[56px] background-main-color text-white rounded-full shadow-lg transition duration-300 transform hover:scale-105 active:scale-90 flex items-center justify-center focus:outline-none"
+      >
+        <!-- Chat Icon -->
+        <!--@import(/svg/chat-admin-log.html)-->
+      </button>
+    </div>
+  </body>
 </html>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="../utils/chat-bot.js"></script>
