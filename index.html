@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
   <!--@js(/chatbot/list-chat-bot.js)-->
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Danh sách Chat Bot</title>
+    <title>Chat Bot List</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Custom scrollbar cho khu vực tin nhắn */
+      /* Custom scrollbar for message area */
       .message-area::-webkit-scrollbar {
         width: 4px;
       }
@@ -22,12 +22,12 @@
         background: #555;
       }
 
-      /* Hiệu ứng chuyển đổi cho tab */
+      /* Transition effect for tab */
       .chat-tab-transition {
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
 
-      /* CSS cho Loading Spinner */
+      /* CSS for Loading Spinner */
       .lds-dual-ring {
         display: inline-block;
         width: 15px;
@@ -67,7 +67,7 @@
         border-color: #4f46e5;
       }
 
-      /* Ẩn/hiện màn hình với transition */
+      /* Hide/show screen with transition */
       .screen-view {
         display: flex;
         position: absolute;
@@ -139,14 +139,14 @@
         id="chat-tab"
         class="chat-tab-transition fixed bottom-4 right-4 w-[500px] h-[85vh] max-h-[700px] bg-white rounded-xl shadow-2xl flex flex-col opacity-0 scale-95 pointer-events-none relative sm:right-4"
       >
-        <!-- Màn hình Danh sách Chat Bot -->
+        <!-- Chat Bot List Screen -->
         <div id="list-screen" class="screen-view active flex-1 flex flex-col">
           <!-- Header -->
           <div
             class="p-6 neutral-color rounded-t-xl flex items-center justify-between"
           >
             <h2 class="text-[30px] font-semibold line-height-[36px]">
-              채팅 리스트
+              Chat List
             </h2>
             <button
               id="close-tab-btn"
@@ -177,7 +177,7 @@
             </div>
           </div>
 
-          <!-- Danh sách Chat Bot -->
+          <!-- Chat Bot List -->
           <div
             id="chat-bot-list-container"
             class="flex-1 overflow-y-auto relative"
@@ -199,7 +199,7 @@
           </div>
         </div>
 
-        <!-- Màn hình Chat Window -->
+        <!-- Chat Window Screen -->
         <div id="chat-screen" class="screen-view flex-1 flex flex-col">
           <!-- Chat Header -->
           <div class="p-4 flex items-center justify-between rounded-t-xl">
@@ -226,7 +226,7 @@
               <!-- Avatar Bot -->
               <div class="flex flex-col">
                 <span id="chat-header-title" class="text-lg font-semibold"
-                  >벡스볼트 챗봇</span
+                  >Vexvolt Chatbot</span
                 >
               </div>
             </div>
@@ -237,7 +237,7 @@
             id="message-area"
             class="flex-grow p-4 message-area-content overflow-y-auto space-y-4"
           >
-            <!-- Tin nhắn khởi tạo sẽ được thêm bằng JavaScript -->
+            <!-- Initial messages will be added by JavaScript -->
           </div>
 
           <!-- Input Area -->
@@ -278,4 +278,25 @@
   </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="./chat-bot.js"></script>
+<script src="../apis/chat-bot.js"></script>
+<script src="../utils/chat-bot.js"></script>
+<!-- <script src="../utils/chat-socket-client.js"></script> -->
+<script
+  src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+  crossorigin="anonymous"
+></script>
+
+<script>
+  $(document).ready(function () {
+    if (typeof initializeAdminSocket === "function") {
+      initializeAdminSocket({
+        endpoint: "https://pleximetric-sharlene-unfitly.ngrok-free.dev/chat",
+        userId: null,
+        adminId: "admin_789",
+        storeId: "sehanf",
+      });
+    } else {
+      console.error("❌ [Admin] initializeAdminSocket function not found");
+    }
+  });
+</script>
