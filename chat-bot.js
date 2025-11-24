@@ -87,9 +87,9 @@ $(document).ready(function () {
 async function loadInitialChatBots() {
   if (
     !window.ChatBotAPI ||
-    typeof window.ChatBotAPI.getChatBots !== "function"
+    typeof window.ChatBotAPI.getChatBotAdmin !== "function"
   ) {
-    console.error("ChatBotAPI.getChatBots is not available");
+    console.error("ChatBotAPI.getChatBotAdmin is not available");
     return;
   }
 
@@ -159,8 +159,11 @@ async function performSearch(searchTerm) {
   showSearchLoading();
 
   try {
-    const results = await window.ChatBotAPI.searchChatBots(searchTerm);
-
+    const results = await window.ChatBotAPI.getChatBotAdmin({
+      page: currentPage,
+      limit: itemsPerPage,
+      search: searchTerm,
+    });
     // Update list with search results
     chatBots = Array.isArray(results) ? results : [];
     hasMore = false; // Don't load more when searching
@@ -424,8 +427,12 @@ function appendChatBotItems(bots) {
            <img src="https://sehanf.cafe24.com/web/product/medium/user.svg" alt="user-avatar" />
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="text-[16px] font-semibold text-gray-800 truncate">${bot.userId}</h3>
-            <p class="text-[14px] text-gray-600 truncate">${bot?.description}</p>
+            <h3 class="text-[16px] font-semibold text-gray-800 truncate">${
+              bot.userId
+            }</h3>
+            <p class="text-[14px] text-gray-600 truncate">${
+              bot?.description || ""
+            }</p>
           </div>
         </div>
       </div>
@@ -604,7 +611,9 @@ async function selectChatBot(botId) {
   // Update active state in list
   $(".chat-bot-item").removeClass("active");
   $(`.chat-bot-item[data-bot-id="${botId}"]`).addClass("active");
-
+  adminSocket.emit("client:join_session", {
+    sessionId: currentChatBot.sessionId,
+  });
   // Update chat window header
   updateChatWindowHeader(bot);
 
@@ -679,7 +688,6 @@ function initializeChatMessages(botId) {
   const startIndex = Math.max(0, totalMessages - messagesPerPage);
   const initialMessages = messageHistory[botId].slice(startIndex);
   messages[botId] = [...initialMessages];
-
   // Update page index (oldest unloaded message is startIndex)
   messagePage[botId] = startIndex;
 
@@ -767,7 +775,7 @@ async function restoreMessages(sessionId, botId) {
       const previousMsg = index > 0 ? response[index - 1] : null;
       const previousTimestamp = previousMsg ? previousMsg.timestamp : null;
       appendMessage(
-        msg.messageType === "user" ? "user" : "bot",
+        msg.messageType,
         msg.content || "",
         msg.createdAt || new Date().toISOString(),
         false,
@@ -880,6 +888,7 @@ async function loadMoreMessages() {
 // Prepend message to beginning (to display old messages)
 function prependMessage(sender, text, timestamp = null, nextTimestamp = null) {
   const isUser = sender === "user";
+  const isAdmin = sender === "admin";
   const formattedText = text.replace(/\n/g, "<br>");
   const currentTimestamp = timestamp || new Date().toISOString();
 
@@ -915,40 +924,57 @@ function prependMessage(sender, text, timestamp = null, nextTimestamp = null) {
 
   const botAvatar = `
     <div class="w-8 h-8 rounded-lg chat-bot-around flex items-center justify-center flex-shrink-0">
-      <img src="https://sehanf.cafe24.com/web/product/medium/bot-avatar.svg" alt="bot-avatar" />
+      <img src="https://sehanf.cafe24.com/web/product/medium/bot-avatar.svg" alt="ai-avatar" />
     </div>
   `;
 
-  // Avatar for user
+  // Avatar for Admin is text
+  const adminAvatar = `
+  <span class="text-xs bg-[#00000010] p-2 rounded-lg font-semibold text-blue-600 mb-1 block">관리자</span>
+  `;
+
+  // Avatar for User
   const userAvatar = `
     <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
            <img src="https://sehanf.cafe24.com/web/product/medium/user.svg" alt="user-avatar" />
-     
     </div>
   `;
+
+  const avatarHtml = isUser ? userAvatar : isAdmin ? adminAvatar : botAvatar;
+  const bubbleClass = isUser
+    ? "bg-white text-gray-800"
+    : "background-main-color text-white";
+  const timeAlignmentClass = isUser ? "text-left" : "text-right";
 
   const timeText = formatTime(currentTimestamp);
   const timeHtml = timeText
     ? `
-    <div class="text-[11px] text-gray-400 mt-1 ${
-      isUser ? "text-right" : "text-left"
-    }">
+    <div class="text-[11px] text-gray-400 mt-1 ${timeAlignmentClass}">
       ${timeText}
     </div>
   `
     : "";
 
-  const messageHtml = `
-    <div class="flex ${
-      isUser ? "justify-end" : "justify-start"
-    } items-end gap-2">
-      ${!isUser ? botAvatar : ""}
-      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${
-        isUser ? "background-main-color text-white" : "bg-white text-black-800"
-      }">
+  const contentHtml = isUser
+    ? `
+    <div class="flex justify-start items-end gap-2">
+      ${avatarHtml}
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
         ${formattedText}
       </div>
     </div>
+  `
+    : `
+    <div class="flex justify-end items-end gap-2">
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
+        ${formattedText}
+      </div>
+      ${avatarHtml}
+    </div>
+  `;
+
+  const messageHtml = `
+    ${contentHtml}
     ${timeHtml}
     ${dateDividerHtml}
   `;
@@ -982,6 +1008,7 @@ function appendMessage(
   previousTimestamp = null
 ) {
   const isUser = sender === "user";
+  const isAdmin = sender === "admin";
   const formattedText = text.replace(/\n/g, "<br>");
   const currentTimestamp = timestamp || new Date().toISOString();
 
@@ -1003,36 +1030,61 @@ function appendMessage(
     botAvatarClass = avatarColors[currentChatBot.avatar] || botAvatarClass;
   }
 
+  const adminAvatar = `
+    <span class="text-xs font-semibold p-2 rounded-lg bg-[#00000010] text-black-600">관리자</span>
+  `;
+
   const botAvatar = `
     <div class="w-8 h-8 rounded-lg chat-bot-around flex items-center justify-center flex-shrink-0">
       <img src="https://sehanf.cafe24.com/web/product/medium/bot-avatar.svg" alt="bot-avatar" />
     </div>
   `;
 
+  const userAvatar = `
+    <div class="w-8 h-8 rounded-lg bg-[gray-600] flex items-center justify-center flex-shrink-0">
+      <img src="https://sehanf.cafe24.com/web/product/medium/user.svg" alt="user-avatar" />
+    </div>
+  `;
+
+  const avatarHtml = isUser ? userAvatar : isAdmin ? adminAvatar : botAvatar;
+  const bubbleClass = isUser
+    ? "bg-white text-gray-800"
+    : "background-main-color text-white";
+  const timeAlignmentClass = isUser ? "text-left" : "text-right";
+
   const timeText = formatTime(currentTimestamp);
   const timeHtml = timeText
     ? `
-    <div class="text-[11px] text-gray-400 mt-1 ${
-      isUser ? "text-right" : "text-left"
-    }">
+    <div class="text-[11px] text-gray-400 mt-1 ${timeAlignmentClass}">
       ${timeText}
     </div>
   `
     : "";
+  console.log("isAdmin", formattedText, isAdmin, isUser);
 
-  const messageHtml = `
-    ${dateDividerHtml}
-    <div class="flex ${
-      isUser ? "justify-end" : "justify-start"
-    } items-end gap-2">
-      ${!isUser ? botAvatar : ""}
-      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${
-        isUser ? "background-main-color text-white" : "bg-white text-gray-800"
-      }">
+  const contentHtml = isUser
+    ? `
+    <div class="flex justify-start items-end gap-2">
+      ${avatarHtml}
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
         <div>${formattedText}</div>
         ${timeHtml}
       </div>
     </div>
+  `
+    : `
+    <div class="flex justify-end items-end gap-2">
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
+        <div>${formattedText}</div>
+        ${timeHtml}
+      </div>
+      ${avatarHtml}
+    </div>
+  `;
+
+  const messageHtml = `
+    ${dateDividerHtml}
+    ${contentHtml}
   `;
 
   $messageArea.append(messageHtml);
@@ -1110,7 +1162,7 @@ async function sendMessage() {
   const currentTimestamp = new Date().toISOString();
 
   // Display user message
-  appendMessage("user", userText, currentTimestamp, true, previousTimestamp);
+  appendMessage("admin", userText, currentTimestamp, true, previousTimestamp);
   $chatInput.val("");
 
   // Show loading
@@ -1127,9 +1179,7 @@ async function sendMessage() {
       console.error("❌ [Admin] Cannot send message - sessionId is missing");
       return;
     }
-    adminSocket.emit("client:join_session", {
-      sessionId: currentChatBot.sessionId,
-    });
+
     const messagePayload = {
       sessionId: currentChatBot.sessionId,
       content: userText,
@@ -1335,8 +1385,8 @@ function bindAdminSocketEvents() {
   console.log("✅ [Admin] server:session_created event listener registered");
 
   adminSocket.on("server:message", (data) => {
-    // Kiểm tra nếu message thuộc session hiện tại và không phải admin message
-    const { message } = data?.firstArg;
+    console.log("server:message event received:", data);
+    const { message } = data;
     console.log("message", message, data);
     if (
       currentChatBot &&
@@ -1345,12 +1395,10 @@ function bindAdminSocketEvents() {
       message.messageType !== "admin"
     ) {
       appendMessage(message.messageType, message.content, message.createdAt);
-
       // Scroll to bottom after adding new message
       setTimeout(() => {
         $messageArea.scrollTop($messageArea.prop("scrollHeight"));
       }, 100);
-
       console.log("✅ [Admin] Message added and scrolled");
     } else {
       console.log("⚠️ [Admin] Message ignored - conditions not met");
@@ -1360,32 +1408,32 @@ function bindAdminSocketEvents() {
   console.log("✅ [Admin] server:message event listener registered");
 
   if (typeof adminSocket.onAny === "function") {
-    adminSocket.onAny((eventName, ...args) => {
-      console.log(`📡 [Admin] Any socket event received "${eventName}":`, {
-        eventName: eventName,
-        args: args,
-        firstArg: args[0],
-      });
-      const { message } = args[0];
-      console.log("message111", message, args);
-      if (
-        currentChatBot &&
-        message?.sessionId === currentChatBot.sessionId &&
-        message &&
-        message.messageType !== "admin"
-      ) {
-        appendMessage(message.messageType, message.content, message.createdAt);
+    // adminSocket.onAny((eventName, ...args) => {
+    //   console.log(`📡 [Admin] Any socket event received "${eventName}":`, {
+    //     eventName: eventName,
+    //     args: args,
+    //     firstArg: args[0],
+    //   });
+    //   const { message } = args[0];
+    //   console.log("message111", message, args);
+    //   if (
+    //     currentChatBot &&
+    //     message?.sessionId === currentChatBot.sessionId &&
+    //     message &&
+    //     message.messageType !== "admin"
+    //   ) {
+    //     appendMessage(message.messageType, message.content, message.createdAt);
 
-        // Scroll to bottom after adding new message
-        setTimeout(() => {
-          $messageArea.scrollTop($messageArea.prop("scrollHeight"));
-        }, 100);
+    //     // Scroll to bottom after adding new message
+    //     setTimeout(() => {
+    //       $messageArea.scrollTop($messageArea.prop("scrollHeight"));
+    //     }, 100);
 
-        console.log("✅ [Admin] Message added and scrolled");
-      } else {
-        console.log("⚠️ [Admin] Message ignored - conditions not met");
-      }
-    });
+    //     console.log("✅ [Admin] Message added and scrolled");
+    //   } else {
+    //     console.log("⚠️ [Admin] Message ignored - conditions not met");
+    //   }
+    // });
     console.log("✅ [Admin] onAny event listener registered");
   } else {
     console.warn("⚠️ [Admin] onAny function not available on socket");
