@@ -7,9 +7,9 @@
 // api get token: 'https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/auth/cafe24/authorize?storeId=sehanf'
 
 (function registerChatBotAPI(global) {
-  // const API_BASE_URL =
-  //   "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api";
-  const API_BASE_URL = "http://172.16.11.18:8080/api/v1/chat";
+  const API_BASE_URL =
+    "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api";
+  // const API_BASE_URL = "http://172.16.11.18:8080/api/v1/chat";
 
   const FALLBACK_CHAT_BOTS = [
     {
@@ -183,10 +183,10 @@
           "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/auth/cafe24/authorize?storeId=sehanf"
         );
         console.log("response", response);
-        // const fakeToken =
-        //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM1NTA0NTEsImV4cCI6MTc2NDc2MDA1MSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.dF3TUNcbomJRtfEz1cpqIDVG1CbPj2kbrRKp3DZKlag";
-        // localStorage.setItem("token", fakeToken);
-        // return fakeToken;
+        const fakeToken =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM1NTA0NTEsImV4cCI6MTc2NDc2MDA1MSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.dF3TUNcbomJRtfEz1cpqIDVG1CbPj2kbrRKp3DZKlag";
+        localStorage.setItem("token", fakeToken);
+        return fakeToken;
         if (!response.ok) {
           throw new Error(
             `Failed to get token: ${response.status} ${response.statusText}`
@@ -275,6 +275,7 @@
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "1",
         },
       });
       const data = await response.json();
@@ -286,10 +287,12 @@
   }
 
   // get chat bot admin
+  // update search
   async function getChatBotAdmin({
     storeId = "sehanf",
     page = 1,
     limit = 20,
+    search = "",
   } = {}) {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -299,6 +302,7 @@
       storeId: "sehanf",
       page: String(page),
       limit: String(limit),
+      search: search,
     });
 
     try {
@@ -308,6 +312,7 @@
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "1",
         },
       });
       const data = await response.json();
@@ -346,6 +351,7 @@
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "1",
       },
     });
     if (!response.ok) {
