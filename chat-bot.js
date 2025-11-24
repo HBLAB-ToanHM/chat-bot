@@ -56,9 +56,7 @@ $(document).ready(function () {
   loadInitialChatBots();
 
   // call api get token when start page
-  getToken().catch((error) => {
-    console.error("Error getting token on page load:", error);
-  });
+
   // Handle send message event
   $sendButton.on("click", sendMessage);
   $chatInput.on("keypress", function (e) {
