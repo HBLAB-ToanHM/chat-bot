@@ -56,7 +56,9 @@ $(document).ready(function () {
   loadInitialChatBots();
 
   // call api get token when start page
-
+  getToken().catch((error) => {
+    console.error("Error getting token on page load:", error);
+  });
   // Handle send message event
   $sendButton.on("click", sendMessage);
   $chatInput.on("keypress", function (e) {
@@ -1381,6 +1383,15 @@ function bindAdminSocketEvents() {
     refreshAdminSessionList();
   });
   console.log("✅ [Admin] server:session_created event listener registered");
+
+  // listen server when have new user message use admin:new_session
+  adminSocket.on("server:new_session", (data) => {
+    console.log("server:new_session event received:", data);
+    const { sessionId } = data;
+    console.log("sessionId", sessionId);
+    refreshAdminSessionList();
+  });
+  console.log("✅ [Admin] server:new_session event listener registered");
 
   adminSocket.on("server:message", (data) => {
     console.log("server:message event received:", data);
