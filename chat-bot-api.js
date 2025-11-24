@@ -8,7 +8,7 @@
 
 (function registerChatBotAPI(global) {
   const API_BASE_URL =
-    "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api";
+    "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/chat";
   // const API_BASE_URL = "http://172.16.11.18:8080/api/v1/chat";
 
   const FALLBACK_CHAT_BOTS = [
@@ -179,12 +179,18 @@
     if (!token) {
       try {
         // use fetch handle result, if success, store token to localStorage
-        const response = await fetch(
-          "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/auth/cafe24/authorize?storeId=sehanf"
-        );
-        console.log("response", response);
+        // const response = await fetch(
+        //   "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/auth/cafe24/authorize?storeId=sehanf",
+        //   {
+        //     headers: {
+        //       "ngrok-skip-browser-warning": "1",
+        //       "Content-Type": "application/json",
+        //     },
+        //   }
+        // );
+        // console.log("response", response);
         const fakeToken =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM1NTA0NTEsImV4cCI6MTc2NDc2MDA1MSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.dF3TUNcbomJRtfEz1cpqIDVG1CbPj2kbrRKp3DZKlag";
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM5NjgxMzEsImV4cCI6MTc2NTE3NzczMSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.Xv3Q2_bY9NM6dnUvz8gzBWt2JKqVho9fKyCZthRT_KM";
         localStorage.setItem("token", fakeToken);
         return fakeToken;
         if (!response.ok) {
@@ -295,6 +301,7 @@
     search = "",
   } = {}) {
     const token = localStorage.getItem("token");
+    console.log("token111", token);
     if (!token) {
       throw new Error("Token is required");
     }
