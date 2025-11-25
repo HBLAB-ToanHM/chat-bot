@@ -966,7 +966,7 @@ function prependMessage(sender, text, timestamp = null, nextTimestamp = null) {
   `
     : `
     <div class="flex justify-end items-end gap-2">
-      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm break-words ${bubbleClass}">
         ${formattedText}
       </div>
       ${avatarHtml}
@@ -1074,7 +1074,7 @@ function appendMessage(
   `
     : `
     <div class="flex justify-end items-end gap-2">
-      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm ${bubbleClass}">
+      <div class="max-w-[80%] p-3 rounded-xl shadow-sm text-sm break-words ${bubbleClass}">
         <div>${formattedText}</div>
         ${timeHtml}
       </div>
