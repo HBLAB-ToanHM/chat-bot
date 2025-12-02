@@ -10,7 +10,7 @@
   // const API_BASE_URL =
   // "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/chat";
   // const API_BASE_URL = "http://172.16.11.18:8080/api/v1/chat";
-  const API_BASE_URL = "https://183.91.3.171/api/v1/chat";
+  const API_BASE_URL = "https://api-heasung.hblab.dev/api/v1/chat";
   const FALLBACK_CHAT_BOTS = [
     {
       id: "b2b-ai",
