@@ -180,7 +180,7 @@
       try {
         // use fetch handle result, if success, store token to localStorage
         const response = await fetch(
-          "https://api-heasung.hblab.dev/v1/auth/cafe24/authorize?storeId=sehanf",
+          "https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf",
           {
             headers: {
               "ngrok-skip-browser-warning": "1",
