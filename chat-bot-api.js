@@ -11,277 +11,110 @@
   // "https://pleximetric-sharlene-unfitly.ngrok-free.dev/api/v1/chat";
   // const API_BASE_URL = "http://172.16.11.18:8080/api/v1/chat";
   const API_BASE_URL = "https://api-heasung.hblab.dev/api/v1/chat";
-  const FALLBACK_CHAT_BOTS = [
-    {
-      id: "b2b-ai",
-      name: "B2B Consulting (AI)",
-      description: "AI-powered chatbot for business consulting",
-      avatar: "indigo",
-      initialMessage:
-        "Hello! I'm an AI business consultant. Please ask about products or pricing.",
-      apiKey: "",
-    },
-    {
-      id: "customer-support",
-      name: "Customer Support",
-      description: "24/7 customer support chatbot",
-      avatar: "blue",
-      initialMessage:
-        "Hello! I'm your customer support assistant. How can I help you?",
-      apiKey: "",
-    },
-    {
-      id: "sales-assistant",
-      name: "Sales Assistant",
-      description: "Chatbot for sales and product consultation",
-      avatar: "green",
-      initialMessage:
-        "Hi there! I'm your sales assistant. Which product would you like to learn about?",
-      apiKey: "",
-    },
-    {
-      id: "technical-support",
-      name: "Technical Support",
-      description: "Chatbot for technical support and troubleshooting",
-      avatar: "purple",
-      initialMessage:
-        "Hello! I'm your technical support assistant. What do you need help with?",
-      apiKey: "",
-    },
-    {
-      id: "marketing-bot",
-      name: "Marketing Bot",
-      description: "Chatbot for marketing and advertising support",
-      avatar: "pink",
-      initialMessage:
-        "Hello! I'm your marketing bot. I can help with marketing strategies.",
-      apiKey: "",
-    },
-    {
-      id: "hr-bot",
-      name: "HR Bot",
-      description: "Chatbot for recruitment and HR management",
-      avatar: "yellow",
-      initialMessage:
-        "Hello! I'm your HR bot. I can assist with recruitment and HR tasks.",
-      apiKey: "",
-    },
-    {
-      id: "finance-bot",
-      name: "Finance Bot",
-      description: "Chatbot for finance and accounting support",
-      avatar: "teal",
-      initialMessage:
-        "Hello! I'm your finance bot. I can help with financial and accounting matters.",
-      apiKey: "",
-    },
-    {
-      id: "shipping-bot",
-      name: "Shipping Bot",
-      description: "Chatbot for shipping and delivery support",
-      avatar: "orange",
-      initialMessage:
-        "Hello! I'm your shipping bot. I can help track orders and deliveries.",
-      apiKey: "",
-    },
-    {
-      id: "product-bot",
-      name: "Product Bot",
-      description: "Chatbot for product and service consultation",
-      avatar: "cyan",
-      initialMessage:
-        "Hello! I'm your product bot. I can help you explore products and services.",
-      apiKey: "",
-    },
-    {
-      id: "order-bot",
-      name: "Order Bot",
-      description: "Chatbot for order management and placement",
-      avatar: "amber",
-      initialMessage:
-        "Hello! I'm your order bot. I can help you place and track orders.",
-      apiKey: "",
-    },
-    {
-      id: "payment-bot",
-      name: "Payment Bot",
-      description: "Chatbot for payment and transaction support",
-      avatar: "emerald",
-      initialMessage:
-        "Hello! I'm your payment bot. I can assist with payments and transactions.",
-      apiKey: "",
-    },
-    {
-      id: "faq-bot",
-      name: "FAQ Bot",
-      description: "Chatbot for frequently asked questions",
-      avatar: "violet",
-      initialMessage:
-        "Hello! I'm your FAQ bot. I can answer your frequently asked questions.",
-      apiKey: "",
-    },
-    {
-      id: "support-bot-2",
-      name: "Customer Support 2",
-      description: "Advanced customer support chatbot",
-      avatar: "rose",
-      initialMessage:
-        "Hello! I'm your advanced customer support bot. How can I assist you?",
-      apiKey: "",
-    },
-    {
-      id: "consultant-bot",
-      name: "Consultant Bot",
-      description: "Professional consulting chatbot",
-      avatar: "sky",
-      initialMessage:
-        "Hello! I'm your professional consultant bot. I can advise you across various fields.",
-      apiKey: "",
-    },
-    {
-      id: "booking-bot",
-      name: "Booking Bot",
-      description: "Chatbot for scheduling and appointments",
-      avatar: "fuchsia",
-      initialMessage:
-        "Hello! I'm your booking bot. I can help you schedule and manage appointments.",
-      apiKey: "",
-    },
-    {
-      id: "notification-bot",
-      name: "Notification Bot",
-      description: "Chatbot for sending notifications and updates",
-      avatar: "lime",
-      initialMessage:
-        "Hello! I'm your notification bot. I can send you updates and alerts.",
-      apiKey: "",
-    },
-  ];
 
-  function getFallbackBots(page, limit) {
-    const pageIndex = Math.max(1, Number(page) || 1);
-    const pageSize = Math.max(1, Number(limit) || 4);
-    const startIndex = (pageIndex - 1) * pageSize;
-    const fallbackSlice = FALLBACK_CHAT_BOTS.slice(
-      startIndex,
-      startIndex + pageSize
-    );
-    const hasMore =
-      startIndex + fallbackSlice.length < FALLBACK_CHAT_BOTS.length;
-    return {
-      data: fallbackSlice.map((bot) => ({ ...bot })),
-      hasMore,
-      total: FALLBACK_CHAT_BOTS.length,
-    };
-  }
-  async function getToken() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      try {
-    const url = 'https://sehanf.cafe24api.com/api/v2/oauth/authorize?response_type=code&client_id=WfkRlLSXCK7THVuIdJis7G&state=1734262400000&redirect_uri=https%3A%2F%2Fcapable-lamington-043ff3.netlify.app%2F&scope=mall.read_store%2Cmall.read_product%2Cmall.read_category%2Cmall.read_customer'
-    window.location.href = url;
-
-            const authorizationCode = new URLSearchParams(window.location.search).get('code');
-    console.log("🔑 [getToken] Authorization code:", authorizationCode);
-
-    // use the authorization code to get the access token
-    const data = await fetch(
-      'https://sehanf.cafe24api.com/api/v2/oauth/token', {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${btoa('WfkRlLSXCK7THVuIdJis7G:')}`
-      },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code: authorizationCode,
-        redirect_uri: 'https://capable-lamington-043ff3.netlify.app/',
-      }),
-    });
-    const responseData = await data.json();
-    console.log("🔑 [getToken] Response data:", responseData);
-    return responseData.access_token;
-        // use fetch handle result, if success, store token to localStorage
-        // const response = await fetch(
-        //   "https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf",
-        //   {
-        //     headers: {
-        //       "ngrok-skip-browser-warning": "1",
-        //       "Content-Type": "application/json",
-        //     },
-        //   }
-        // );
-        // console.log("response", response);
-        // // const fakeToken =
-        // //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM5NjgxMzEsImV4cCI6MTc2NTE3NzczMSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.Xv3Q2_bY9NM6dnUvz8gzBWt2JKqVho9fKyCZthRT_KM";
-        // // localStorage.setItem("token", fakeToken);
-        // // return fakeToken;
-        // if (!response.ok) {
-        //   throw new Error(
-        //     `Failed to get token: ${response.status} ${response.statusText}`
-        //   );
-        // }
-        // const data = await response.json();
-        // console.log("token get from api", data);
-        // if (data && data?.data?.token) {
-        //   localStorage.setItem("token", data.token);
-        //   return data.token;
-        // } else {
-        //   throw new Error("Token not found in response data");
-        // }
-      } catch (error) {
-        console.error("Error getting token:", error);
-        throw error;
-      }
-    } else {
+  // Check if token exists in URL params (after OAuth callback redirect)
+  function checkTokenInUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    
+    if (token) {
+      console.log("🔑 [checkTokenInUrl] Token found in URL, saving...");
+      localStorage.setItem("token", token);
+      // Clean up URL - remove token param
+      window.history.replaceState({}, document.title, window.location.pathname);
       return token;
     }
+    return null;
   }
-  async function parseChatBotResponse(response, page, limit) {
-    if (!response.ok) {
-      throw new Error(`Failed to fetch chat bots: ${response.status}`);
-    }
 
-    const payload = await response.json();
-    let bots = [];
-    let hasMore = false;
-    let total = 0;
+  // Exchange authorization code for token via backend (keeps client_secret secure)
+  async function exchangeCodeForToken(code) {
+    console.log("🔄 [exchangeCode] Sending code to backend...");
+    
+    try {
+      const response = await fetch("https://api-heasung.hblab.dev/api/v1/auth/cafe24/exchange", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: code,
+          redirectUri: "https://capable-lamington-043ff3.netlify.app/",
+          storeId: "sehanf",
+        }),
+      });
 
-    if (Array.isArray(payload)) {
-      bots = payload;
-      total = payload.length;
-    } else if (payload && typeof payload === "object") {
-      if (Array.isArray(payload.data)) {
-        bots = payload.data;
-      } else if (Array.isArray(payload.items)) {
-        bots = payload.items;
-      } else if (Array.isArray(payload.list)) {
-        bots = payload.list;
+      if (!response.ok) {
+        throw new Error(`Exchange failed: ${response.status}`);
       }
 
-      hasMore = Boolean(payload.hasMore);
+      const data = await response.json();
+      console.log("🔄 [exchangeCode] Response:", data);
+      
+      return data?.data?.token || data?.token || data?.access_token;
+    } catch (error) {
+      console.error("❌ [exchangeCode] Error:", error);
+      return null;
+    }
+  }
 
-      if (typeof payload.total === "number") {
-        total = payload.total;
-      } else if (typeof payload.count === "number") {
-        total = payload.count;
+  async function getToken() {
+    console.log("🔑 [getToken] Starting getToken...");
+    
+    // Step 1: Check localStorage
+    let token = localStorage.getItem("token");
+    if (token) {
+      console.log("🔑 [getToken] Token found in localStorage");
+      return token;
+    }
+
+    // Step 2: Check URL for token (from backend redirect)
+    token = checkTokenInUrl();
+    if (token) {
+      console.log("🔑 [getToken] Token found in URL params");
+      return token;
+    }
+
+    // Step 3: Check URL for authorization code (from Cafe24 redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    
+    if (code) {
+      console.log("🔑 [getToken] Authorization code found:", code);
+      
+      // Exchange code for token via backend
+      token = await exchangeCodeForToken(code);
+      
+      if (token) {
+        localStorage.setItem("token", token);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log("✅ [getToken] Token saved successfully");
+        return token;
+      } else {
+        console.error("❌ [getToken] Failed to exchange code for token");
       }
     }
 
-    if (!hasMore) {
-      const pageIndex = Math.max(1, Number(page) || 1);
-      const pageSize = Math.max(1, Number(limit) || 4);
-      const computedTotal =
-        pageIndex * pageSize -
-        (pageSize - (Array.isArray(bots) ? bots.length : 0));
-      total = total || Math.max(computedTotal, 0);
-      hasMore = Array.isArray(bots) ? bots.length === pageSize : false;
-    }
-
-    return {
-      data: Array.isArray(bots) ? bots : [],
-      hasMore,
-      total,
-    };
+    // Step 4: No token AND no code, redirect to Cafe24 OAuth
+    console.log("🔑 [getToken] No token/code found, redirecting to Cafe24...");
+    const authorizeUrl = 'https://sehanf.cafe24api.com/api/v2/oauth/authorize?response_type=code&client_id=WfkRlLSXCK7THVuIdJis7G&state=1734262400000&redirect_uri=https%3A%2F%2Fcapable-lamington-043ff3.netlify.app%2F&scope=mall.read_store%2Cmall.read_product%2Cmall.read_category%2Cmall.read_customer';
+    
+    window.location.href = authorizeUrl;
+    return null; // Page will redirect
+    
+    // // Step 3: No token, redirect to backend authorize endpoint
+    // // IMPORTANT: Use redirect, NOT fetch() - OAuth authorize doesn't allow CORS
+    // console.log("🔑 [getToken] No token found, redirecting to authorize...");
+    
+    // // Encode frontend callback URL so backend knows where to redirect after OAuth
+    // const callbackUrl = encodeURIComponent(window.location.href);
+    // const authorizeUrl = `https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf&callback=${callbackUrl}`;
+    
+    // console.log("🔑 [getToken] Redirecting to:", authorizeUrl);
+    // window.location.href = authorizeUrl;  // ← REDIRECT, không phải fetch()
+    
+    // return null; // Page will redirect, code won't continue
   }
 
   async function getChatBots({ page = 1, limit = 20 } = {}) {
@@ -310,7 +143,6 @@
       return data?.data?.sessions;
     } catch (error) {
       console.error("Error fetching chat bots:", error);
-      return getFallbackBots(page, limit);
     }
   }
 
@@ -348,7 +180,6 @@
       return data?.data?.sessions;
     } catch (error) {
       console.error("Error fetching chat bots:", error);
-      return getFallbackBots(page, limit);
     }
   }
 
@@ -470,10 +301,7 @@
   }
 
   async function searchChatBots(searchTerm) {
-    if (!searchTerm) {
-      return getFallbackBots(1, FALLBACK_CHAT_BOTS.length).data;
-    }
-
+   
     const params = new URLSearchParams({
       q: searchTerm,
     });
@@ -494,15 +322,7 @@
       }
       return [];
     } catch (error) {
-      console.error("Error searching chat bots:", error);
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      return FALLBACK_CHAT_BOTS.filter((bot) => {
-        const nameMatch = bot.name.toLowerCase().includes(lowerSearchTerm);
-        const descriptionMatch = bot.description
-          .toLowerCase()
-          .includes(lowerSearchTerm);
-        return nameMatch || descriptionMatch;
-      }).map((bot) => ({ ...bot }));
+      console.error("Error searching chat bots:", error);     
     }
   }
 
