@@ -49,35 +49,19 @@
     console.log("🔄 [exchangeCode] Calling Cafe24 token API directly...");
     
     try {
-      // Base64 encode client_id:client_secret
-      const credentials = btoa(`${CAFE24_CLIENT_ID}:${CAFE24_CLIENT_SECRET}`);
-      
-      const response = await fetch(`https://${CAFE24_MALL_ID}.cafe24api.com/api/v2/oauth/token`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${credentials}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          code: code,
-          redirect_uri: CAFE24_REDIRECT_URI,
-        }),
-      });
-
-      console.log("🔄 [exchangeCode] Response status:", response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("❌ [exchangeCode] Error response:", errorData);
-        throw new Error(`Exchange failed: ${response.status}`);
-      }
-
+   const apiGetTokenUrl = 'https://api-heasung.hblab.dev/api/v1/auth/cafe24/callback?code=' + code + '&state=store_12345&error=access_denied&error_description=Client_id%2Bis%2Bnot%2Bregistered';      
+      const response = await fetch(
+        apiGetTokenUrl,
+        {
+          method: "GET",
+        }
+      );
+      console.log('data', response);
       const data = await response.json();
-      console.log("🔄 [exchangeCode] Cafe24 response:", data);
-      
-      // Cafe24 returns: { access_token, refresh_token, expires_in, ... }
+      console.log('data2', data);
       return data?.access_token;
+
+     
     } catch (error) {
       console.error("❌ [exchangeCode] Error:", error);
       return null;
