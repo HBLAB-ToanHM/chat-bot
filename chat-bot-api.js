@@ -178,34 +178,56 @@
     const token = localStorage.getItem("token");
     if (!token) {
       try {
+    const url = 'https://sehanf.cafe24api.com/api/v2/oauth/authorize?response_type=code&client_id=WfkRlLSXCK7THVuIdJis7G&state=1734262400000&redirect_uri=https%3A%2F%2Fcapable-lamington-043ff3.netlify.app%2F&scope=mall.read_store%2Cmall.read_product%2Cmall.read_category%2Cmall.read_customer'
+    window.location.href = url;
+
+            const authorizationCode = new URLSearchParams(window.location.search).get('code');
+    console.log("🔑 [getToken] Authorization code:", authorizationCode);
+
+    // use the authorization code to get the access token
+    const data = await fetch(
+      'https://sehanf.cafe24api.com/api/v2/oauth/token', {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${btoa('WfkRlLSXCK7THVuIdJis7G:')}`
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code: authorizationCode,
+        redirect_uri: 'https://capable-lamington-043ff3.netlify.app/',
+      }),
+    });
+    const responseData = await data.json();
+    console.log("🔑 [getToken] Response data:", responseData);
+    return responseData.access_token;
         // use fetch handle result, if success, store token to localStorage
-        const response = await fetch(
-          "https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf",
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "1",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log("response", response);
-        // const fakeToken =
-        //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM5NjgxMzEsImV4cCI6MTc2NTE3NzczMSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.Xv3Q2_bY9NM6dnUvz8gzBWt2JKqVho9fKyCZthRT_KM";
-        // localStorage.setItem("token", fakeToken);
-        // return fakeToken;
-        if (!response.ok) {
-          throw new Error(
-            `Failed to get token: ${response.status} ${response.statusText}`
-          );
-        }
-        const data = await response.json();
-        console.log("token get from api", data);
-        if (data && data?.data?.token) {
-          localStorage.setItem("token", data.token);
-          return data.token;
-        } else {
-          throw new Error("Token not found in response data");
-        }
+        // const response = await fetch(
+        //   "https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf",
+        //   {
+        //     headers: {
+        //       "ngrok-skip-browser-warning": "1",
+        //       "Content-Type": "application/json",
+        //     },
+        //   }
+        // );
+        // console.log("response", response);
+        // // const fakeToken =
+        // //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWhhbmYiLCJ0eXBlIjoic3RvcmUiLCJpYXQiOjE3NjM5NjgxMzEsImV4cCI6MTc2NTE3NzczMSwiYXVkIjoiY2FmZTI0LXN0b3JlcyIsImlzcyI6ImtwLTE3Mi1hcGkifQ.Xv3Q2_bY9NM6dnUvz8gzBWt2JKqVho9fKyCZthRT_KM";
+        // // localStorage.setItem("token", fakeToken);
+        // // return fakeToken;
+        // if (!response.ok) {
+        //   throw new Error(
+        //     `Failed to get token: ${response.status} ${response.statusText}`
+        //   );
+        // }
+        // const data = await response.json();
+        // console.log("token get from api", data);
+        // if (data && data?.data?.token) {
+        //   localStorage.setItem("token", data.token);
+        //   return data.token;
+        // } else {
+        //   throw new Error("Token not found in response data");
+        // }
       } catch (error) {
         console.error("Error getting token:", error);
         throw error;
