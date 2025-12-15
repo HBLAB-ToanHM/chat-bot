@@ -27,34 +27,62 @@
     return null;
   }
 
-  // Exchange authorization code for token via backend (keeps client_secret secure)
+  // Flag to prevent multiple exchange calls
+  let isExchangingCode = false;
+
+  // Cafe24 OAuth credentials
+  const CAFE24_CLIENT_ID = "WfkRlLSXCK7THVuIdJis7G";
+  const CAFE24_CLIENT_SECRET = "OneQI9xaeEmpGCpPWzfwkF";  // ⚠️ WARNING: Exposed in frontend!
+  const CAFE24_REDIRECT_URI = "https://capable-lamington-043ff3.netlify.app/";
+  const CAFE24_MALL_ID = "sehanf";
+
+  // Exchange authorization code for token via Cafe24 API directly
+  // ⚠️ WARNING: This exposes client_secret in browser - use backend in production!
   async function exchangeCodeForToken(code) {
-    console.log("🔄 [exchangeCode] Sending code to backend...");
+    // Prevent multiple calls
+    if (isExchangingCode) {
+      console.log("🔄 [exchangeCode] Already exchanging, skipping...");
+      return null;
+    }
+    isExchangingCode = true;
+    
+    console.log("🔄 [exchangeCode] Calling Cafe24 token API directly...");
     
     try {
-      const response = await fetch("https://api-heasung.hblab.dev/api/v1/auth/cafe24/exchange", {
+      // Base64 encode client_id:client_secret
+      const credentials = btoa(`${CAFE24_CLIENT_ID}:${CAFE24_CLIENT_SECRET}`);
+      
+      const response = await fetch(`https://${CAFE24_MALL_ID}.cafe24api.com/api/v2/oauth/token`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Authorization": `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify({
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
           code: code,
-          redirectUri: "https://capable-lamington-043ff3.netlify.app/",
-          storeId: "sehanf",
+          redirect_uri: CAFE24_REDIRECT_URI,
         }),
       });
 
+      console.log("🔄 [exchangeCode] Response status:", response.status);
+
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ [exchangeCode] Error response:", errorData);
         throw new Error(`Exchange failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("🔄 [exchangeCode] Response:", data);
+      console.log("🔄 [exchangeCode] Cafe24 response:", data);
       
-      return data?.data?.token || data?.token || data?.access_token;
+      // Cafe24 returns: { access_token, refresh_token, expires_in, ... }
+      return data?.access_token;
     } catch (error) {
       console.error("❌ [exchangeCode] Error:", error);
       return null;
+    } finally {
+      isExchangingCode = false;
     }
   }
 
@@ -82,17 +110,20 @@
     if (code) {
       console.log("🔑 [getToken] Authorization code found:", code);
       
+      // Clean up URL IMMEDIATELY to prevent re-processing
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
       // Exchange code for token via backend
       token = await exchangeCodeForToken(code);
       
       if (token) {
         localStorage.setItem("token", token);
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
         console.log("✅ [getToken] Token saved successfully");
         return token;
       } else {
         console.error("❌ [getToken] Failed to exchange code for token");
+        // Don't redirect again - let user retry manually
+        return null;
       }
     }
 
