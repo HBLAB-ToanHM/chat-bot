@@ -72,7 +72,14 @@
 
   async function getToken() {
     console.log("🔑 [getToken] Starting getToken...");
+     const authorizeUrl = 'https://sehanf.cafe24api.com/api/v2/oauth/authorize?response_type=code&client_id=WfkRlLSXCK7THVuIdJis7G&state=1734262400000&redirect_uri=https%3A%2F%2Fcapable-lamington-043ff3.netlify.app%2F&scope=mall.read_store%2Cmall.read_product%2Cmall.read_category%2Cmall.read_customer';
     
+    window.location.href = authorizeUrl;
+
+     const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    console.log('codeee', code);
+    return;
     // Step 1: Check localStorage
     let token = localStorage.getItem("token");
     if (token) {
