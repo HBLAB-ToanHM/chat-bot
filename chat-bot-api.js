@@ -38,7 +38,7 @@
 
   // Exchange authorization code for token via Cafe24 API directly
   // ⚠️ WARNING: This exposes client_secret in browser - use backend in production!
-  async function exchangeCodeForToken(code) {
+  async function exchangeCodeForToken(code, state) {
     // Prevent multiple calls
     if (isExchangingCode) {
       console.log("🔄 [exchangeCode] Already exchanging, skipping...");
@@ -49,19 +49,17 @@
     console.log("🔄 [exchangeCode] Calling Cafe24 token API directly...");
     
     try {
-   const apiGetTokenUrl = 'https://api-heasung.hblab.dev/api/v1/auth/cafe24/callback?code=' + code + '&state=store_12345&error=access_denied&error_description=Client_id%2Bis%2Bnot%2Bregistered';      
+      const apiGetTokenUrl = 'https://api-heasung.hblab.dev/api/v1/auth/cafe24/callback?code=' + code + '&state=' + state;      
+      console.log('apiGetTokenUrl', apiGetTokenUrl);
       const response = await fetch(
         apiGetTokenUrl,
         {
           method: "GET",
         }
       );
-      console.log('data', response);
       const data = await response.json();
-      console.log('data2', data);
+      console.log('data', data);
       return data?.access_token;
-
-     
     } catch (error) {
       console.error("❌ [exchangeCode] Error:", error);
       return null;
@@ -72,16 +70,7 @@
 
   async function getToken() {
     console.log("🔑 [getToken] Starting getToken...");
-     const authorizeUrl = 'https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf';
     
-    window.location.href = authorizeUrl;
-
-     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-    const state = urlParams.get("state");
-    console.log('codeee', code);
-    console.log('state', state);
-    return;
     // Step 1: Check localStorage
     let token = localStorage.getItem("token");
     if (token) {
@@ -99,12 +88,14 @@
     // Step 3: Check URL for authorization code (from Cafe24 redirect)
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    
+    const state = urlParams.get("state");
+
     if (code) {
       console.log("🔑 [getToken] Authorization code found:", code);
       
       // Clean up URL IMMEDIATELY to prevent re-processing
       window.history.replaceState({}, document.title, window.location.pathname);
+      console.log('code', code);
       
       // Exchange code for token via backend
       token = await exchangeCodeForToken(code);
@@ -122,10 +113,9 @@
 
     // Step 4: No token AND no code, redirect to Cafe24 OAuth
     console.log("🔑 [getToken] No token/code found, redirecting to Cafe24...");
-    const authorizeUrl = 'https://sehanf.cafe24api.com/api/v2/oauth/authorize?response_type=code&client_id=WfkRlLSXCK7THVuIdJis7G&state=1734262400000&redirect_uri=https%3A%2F%2Fcapable-lamington-043ff3.netlify.app%2F&scope=mall.read_store%2Cmall.read_product%2Cmall.read_category%2Cmall.read_customer';
+    const authorizeUrl = 'https://api-heasung.hblab.dev/api/v1/auth/cafe24/authorize?storeId=sehanf';
     
     window.location.href = authorizeUrl;
-    return null; // Page will redirect
     
     // // Step 3: No token, redirect to backend authorize endpoint
     // // IMPORTANT: Use redirect, NOT fetch() - OAuth authorize doesn't allow CORS
