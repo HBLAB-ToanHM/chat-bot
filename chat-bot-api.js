@@ -98,7 +98,7 @@
       console.log('code', code);
       
       // Exchange code for token via backend
-      token = await exchangeCodeForToken(code);
+      token = await exchangeCodeForToken(code, state);
       
       if (token) {
         localStorage.setItem("token", token);
