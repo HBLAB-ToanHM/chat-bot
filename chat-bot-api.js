@@ -19,7 +19,7 @@
     
     if (token) {
       console.log("🔑 [checkTokenInUrl] Token found in URL, saving...");
-      localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
       // Clean up URL - remove token param
       window.history.replaceState({}, document.title, window.location.pathname);
       return token;
@@ -59,7 +59,7 @@
       );
       const data = await response.json();
       console.log('data', data);
-      return data?.access_token;
+      return data?.token;
     } catch (error) {
       console.error("❌ [exchangeCode] Error:", error);
       return null;
@@ -71,10 +71,10 @@
   async function getToken() {
     console.log("🔑 [getToken] Starting getToken...");
     
-    // Step 1: Check localStorage
-    let token = localStorage.getItem("token");
+    // Step 1: Check sessionStorage
+    let token = sessionStorage.getItem("token");
     if (token) {
-      console.log("🔑 [getToken] Token found in localStorage");
+      console.log("🔑 [getToken] Token found in sessionStorage");
       return token;
     }
 
@@ -99,9 +99,9 @@
       
       // Exchange code for token via backend
       token = await exchangeCodeForToken(code, state);
-      
+      console.log('token', token);
       if (token) {
-        localStorage.setItem("token", token);
+        sessionStorage.setItem("token", token);
         console.log("✅ [getToken] Token saved successfully");
         return token;
       } else {
@@ -132,7 +132,7 @@
   }
 
   async function getChatBots({ page = 1, limit = 20 } = {}) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       throw new Error("Token is required");
     }
@@ -168,7 +168,7 @@
     limit = 20,
     search = "",
   } = {}) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     console.log("token111", token);
     if (!token) {
       throw new Error("Token is required");
@@ -199,7 +199,7 @@
 
   // send message to chat session
   async function sendMessageToChatSession(id, payload) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(`${API_BASE_URL}/sessions/${id}/messages`, {
       method: "POST",
       headers: {
@@ -219,7 +219,7 @@
 
   // get chat session message detail
   async function getChatSessionMessageDetail(id) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(`${API_BASE_URL}/sessions/${id}/messages`, {
       method: "GET",
       headers: {
@@ -239,7 +239,7 @@
 
   // admin join chat
   async function adminJoinChat(sessionId, payload) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(
       `${API_BASE_URL}/sessions/${sessionId}/takeover`,
       {
@@ -260,7 +260,7 @@
 
   // admin leave chat
   async function adminLeaveChat(id, payload) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(
       `${API_BASE_URL}/sessions/${id}/end-takeover`,
       {
@@ -281,7 +281,7 @@
 
   // user create session
   async function userCreateSession(payload) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(`${API_BASE_URL}/sessions`, {
       method: "POST",
       headers: {
@@ -299,7 +299,7 @@
 
   // user close chat
   async function userCloseChat(id) {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const response = await fetch(`${API_BASE_URL}/sessions/${id}/close`, {
       method: "POST",
       headers: {
